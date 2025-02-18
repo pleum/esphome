@@ -15,6 +15,10 @@ class PMS9103MComponent : public PollingComponent, public uart::UARTDevice {
   void loop() override;
   void update() override;
   float get_setup_priority() const override { return setup_priority::DATA; }
+
+ protected:
+  uint8_t data_[32];
+  uint8_t data_index_{0};
 };
 
 }  // namespace pms9103m
