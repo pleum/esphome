@@ -1,5 +1,6 @@
 #include "pms9103m.h"
 #include "esphome/core/log.h"
+#include "esphome/core/helpers.h"
 
 namespace esphome {
 namespace pms9103m {
@@ -20,12 +21,11 @@ void PMS9103MComponent::update() {
   const uint8_t num_bytes = 32;
   uint8_t buffer[num_bytes];
 
-  while (this->available() >= 32) {
-    this->read_byte(&buffer[this->data_index_]);
+  while (this->available() >= num_bytes) {
+    this->read_array(buffer, num_bytes);
   }
 
-  for (uint8_t i = 0; i < num_bytes; i++)
-    ESP_LOGD(TAG, "%02X", buffer[i]);
+  ESP_LOGD(TAG, "Data from sensor: %s", format_hex_pretty(buffer, num_bytes).c_str());
 }
 
 }  // namespace pms9103m
