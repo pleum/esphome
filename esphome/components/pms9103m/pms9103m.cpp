@@ -6,8 +6,16 @@ namespace esphome {
 namespace pms9103m {
 
 static const char *const TAG = "pms9103m";
+static const uint8_t PMS9103M_WAKE_UP_CMD[] = {0x42, 0x4d, 0xe4, 0x00, 0x01, 0x01, 0x74};
+static const uint8_t PMS9103M_SET_ACTIVE_CMD[] = {0x42, 0x4d, 0xe1, 0x00, 0x01, 0x01, 0x71};
 
-void PMS9103MComponent::setup() {}
+void PMS9103MComponent::setup() {
+  ESP_LOGV(TAG, "sending wake up command");
+  this->write_array(PMS9103M_WAKE_UP_CMD, sizeof(PMS9103M_WAKE_UP_CMD));
+
+  ESP_LOGV(TAG, "sending set active command");
+  this->write_array(PMS9103M_SET_ACTIVE_CMD, sizeof(PMS9103M_SET_ACTIVE_CMD));
+}
 
 void PMS9103MComponent::loop() {}
 
