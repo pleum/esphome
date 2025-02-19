@@ -19,13 +19,37 @@ void PMS9103MComponent::dump_config() {
 
 void PMS9103MComponent::update() {
   const uint8_t num_bytes = 32;
-  uint8_t buffer[num_bytes];
+  uint8_t buffer_u8[num_bytes];
 
   while (this->available() >= num_bytes) {
-    this->read_array(buffer, num_bytes);
+    this->read_array(buffer_u8, num_bytes);
   }
 
-  ESP_LOGD(TAG, "Data from sensor: %s", format_hex_pretty(buffer, num_bytes).c_str());
+  // check prefix
+  if (buffer_u8[0] != 0x42 || buffer_u8[1] != 0x4d) {
+    return;
+  }
+
+  uint16_t sum = 0;
+  for (uint8_t i = 0; i < num_bytes - 2; i++)
+    sum += buffer_u8[i];
+
+  uint16_t buffer_u16[13];
+  for (uint8_t i = 0; i < 13; i++) {
+    buffer_u16[i] = buffer_u8[2 + i * 2 + 1];
+    buffer_u16[i] += (buffer_u8[2 + i * 2] << 8);
+  }
+
+  uint8_t version = buffer_u8[2 + 26];
+  uint8_t checksum = buffer_u8[2 + 27];
+
+  if (sum != checksum) {
+    ESP_LOGD(TAG, "Invalid sum from data: %s", format_hex_pretty(buffer_u8, num_bytes).c_str());
+
+    return;
+  }
+
+  ESP_LOGD(TAG, "Data from sensor: %s", format_hex_pretty(buffer_u16, num_bytes).c_str());
 }
 
 }  // namespace pms9103m
